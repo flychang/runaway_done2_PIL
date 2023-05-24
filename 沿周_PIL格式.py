@@ -121,7 +121,115 @@ def get_mouse_pos(event, x, y, flags, param):
         # cv2.imshow("image", img_draw)
         img1 = np.array(img_pil)
         cv2.imshow("image", img1)
+             # 写字上部
+        if 0 < my <= rcy:
+            # 写字，右侧半圆上部
+            if mx > rcx:
+                if w2 + x2 > width - rcx:
+                    # 第一个汉字语句
+                    draw.text((x1 - w2 - w3, y1 + h2), text0, font=font1
+                              , fill=color
+                              )
+                    # 数据1
+                    draw.text((x1 - w2-w1, y1 + h2), text1, font=font1, fill=color
+                              )
+                    # 数据2
+                    draw.text((x1 - w2, y1 + 2 * h2), text2, font=font1, fill=color
+                              )
+                    # 第二个汉字语句
+                    draw.text((x1 - w2 - w3, y1 + 2 * h2), text3, font=font1
+                              , fill=color
+                              )
+            # 写字，左侧半圆上部
+            if mx < lcx:
+                # if w2 + w3 > x2:
+                    draw.text((x1, y1 + h2), text0, font=font1, fill=color
+                              )
+                    draw.text((x1 + w0, y1 + h2), text1, font=font1, fill=color
+                              )
+                    draw.text((x1 + w3, y1 + 2 * h2), text2, font=font1, fill=color
+                              )
+                    draw.text((x1, y1 + 2 * h2), text3, font=font1, fill=color
+                              )
+                # draw.text((x1, y1 + h2), text0, font=font1, fill=color
+                #           )
+                # draw.text((x1 + w0, y1 + h2), text1, font=font1, fill=color
+                #           )
+                # draw.text((x1 + w3, y1 + 2 * h2), text2, font=font1, fill=color
+                #           )
+                # draw.text((x1, y1 + 2 * h2), text3, font=font1, fill=color
+                #           )
 
+            # 写字，中间条形上部
+            if lcx <= mx <= rcx:
+                draw.text((x1 - w3 , y1-h2-h1+trim_upup), text0, font=font1,
+                          fill=color)
+
+                draw.text((x1-w1, y1 - h2-h1 + trim_upup), text1, font=font1, fill=color)
+                draw.text((x1, y1-h2 +trim_up), text2, font=font1, fill=color)
+                draw.text((x1 - w3, y1 -h2+ trim_up), text3, font=font1, fill=color)
+        else:
+            # 写字，右侧半圆下部
+            if mx > rcx:
+                # if  w2 + x2 > width:
+                draw.text((x1 - w2 - w3, y1 - h2-h3), text0, font=font1,
+                          fill=color
+                          )
+                draw.text((x1 - w2-w1, y1 - h2-h3), text1, font=font1, fill=color
+                          )
+                draw.text((x1 - w2, y1-h2), text2, font=font1, fill=color
+                          )
+                draw.text((x1 - w2 - w3, y1-h2), text3, font=font1, fill=color
+                          )
+                # else:
+                #  draw.text(img_draw, text1, (x1 -  w2, y1 - h2), font,    ,fill=color,
+                #               )
+                #  draw.text(img_draw, text2, (x1 -  w2, y1), font,    ,fill=color,
+                #               )
+            # 写字，左侧半圆下部
+            if mx < lcx:
+                if w2 + w3 > x2:
+                    draw.text((x1, y1-h3-h2 ), text0, font=font1, fill=color
+                              )
+                    draw.text((x1 + w0, y1-h3 -h2), text1, font=font1, fill=color
+                              )
+                    draw.text((x1 + w3, y1-h3), text2, font=font1, fill=color
+                              )
+                    draw.text((x1, y1-h3), text3, font=font1, fill=color
+                              )
+
+            # 写字，中间条形下部,分成三部分
+            # 左
+            if lcx + w3 > mx >= lcx:
+                draw.text((x1, y2 - h2-h1 + trim_upup), text0, font=font1, fill=color
+                          )
+                draw.text((x1 + w0, y2 - h2-h1 + trim_upup), text1, font=font1,
+                          fill=color,
+                          )
+                draw.text((x1 + w3, y2- h2 + trim_up), text2, font=font1, fill=color)
+                draw.text((x1, y2- h2 + trim_up), text3, font=font1, fill=color)
+            # 中间
+            if lcx + w3 <= mx <= rcx - w2:
+                draw.text((x1 - w3, y2 - h2-h1 + trim_upup), text0, font=font1,
+                          fill=color
+                          )
+                draw.text((x1-w1, y2 - h2-h1 + trim_upup), text1, font=font1, fill=color)
+                draw.text((x1, y2 - h2+ trim_up), text2, font=font1, fill=color)
+                draw.text((x1 - w3, y2- h2 + trim_up), text3, font=font1, fill=color)
+            # 右侧
+            if rcx - w2 < mx <= rcx:
+                draw.text((x1 -w2- w3, y2 - h2-h1 + trim_upup), text0, font=font1
+                          ,
+                          fill=color
+                          )
+                draw.text((x1 - w2-w1, y2 - h2-h1 + trim_upup), text1, font=font1,
+                          fill=color
+                          )
+                draw.text((x1 - w2, y2- h2 + trim_up), text2, font=font1, fill=color
+                          )
+                draw.text((x1 - w2 - w3, y2- h2 + trim_up), text3, font=font1,
+                          fill=color
+                          )
 
 # 初始化显示窗口
 cv2.namedWindow("image")
