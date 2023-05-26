@@ -231,6 +231,40 @@ def get_mouse_pos(event, x, y, flags, param):
                           fill=color
                           )
 
+
+cv2.namedWindow('image',cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty('image', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+cv2.resizeWindow("image", img.shape[1], img.shape[0])  # 设置窗口大小
+cv2.moveWindow("image",200,200)
+
+# # 初始化显示窗口
+# cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+
+# 绑定鼠标事件处理函数
+cv2.setMouseCallback("image", get_mouse_pos)
+"""
+取消边框（上标题栏）的方法
+1.cv2.namedWindow('image',cv2.WND_PROP_FULLSCREEN)  创建窗口
+    
+2.设置窗口参数
+    将图片改为全屏
+    C++版：
+    CV_WINDOW_NORMAL          = 0x000000000   // 将窗口更改为正常大小或使窗口可调整大小
+    CV_WINDOW_AUTOSIZE        =  0x00000001   // 通过显示的图像约束大，窗口不能调整大小
+    CV_WINDOW_FULLSCREEN  =  1                     // 将窗口更改为全屏
+    CV_WINDOW_FREERATIO      =  0x00000100   // 图像尽可能地扩展(没有比例约束)
+    CV_WINDOW_KEEPRATIO      =  0x00000000    // 使窗口可调整大小，但保留显示图像的比例
+    
+    cv2.setWindowProperty()函数可以用来设置窗口属性，其中第一个参数是窗口名称，第二个参数是要设置的属性，第三个参数是属性值。
+    在这个代码中，第二个参数使用了常量cv2.WND_PROP_FULLSCREEN，表示需要设置窗口的全屏属性。
+    因为我们需要将窗口全屏，所以第三个参数是cv2.WINDOW_FULLSCREEN，表示将窗口设置为真正的全屏，不显示边框和标题栏等内容。
+    cv2.setWindowProperty('image', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+3.# 设置窗口大小
+    cv2.resizeWindow("image", img.shape[1], img.shape[0])  # 设置窗口大小
+4.确定生成窗口位置
+    cv2.moveWindow("image",50,500)
+"""
+
 # 初始化显示窗口
 cv2.namedWindow("image")
 
