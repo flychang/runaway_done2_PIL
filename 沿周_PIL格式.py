@@ -4,26 +4,62 @@ from PIL import ImageFont, ImageDraw, Image
 import math
 import MouseMinWidth
 
-mx = 0
-my = 0
-radius0 = 81
-radius1 = 102
-lcx = 124
-lcy = 198
+# mx = 0
+# my = 0
+# radius0 = 81
+# radius1 = 102
+# lcx = 124
+# lcy = 198
+# lcenter = (lcx, lcy)  # 左圆心
+# rcx = 1142
+# rcy = 198
+# rcenter = (rcx, rcy)  # 右圆心
+# piancha=0
+# #读取图片文件
+# img = cv2.imread("mskover.png")
+# xiaoup = cv2.imread("maskup.png")
+# xiaoleft = cv2.imread("maskleft.png")
+#
+# xiaodown = cv2.imread("maskdown.png")
+# xiaoright = cv2.imread("maskright.png")
+# maskleft = cv2.imread("mmaskleft.png")
+# maskright = cv2.imread("mmaskright.png")
+########################################################
+# radius0 = 82
+# radius1 = 102
+# lcx = 103
+# lcy = 150
+# lcenter = (lcx, lcy)  # 左圆心
+# rcx = 1022
+# rcy = 150
+radius0 = 86
+radius1 = 104
+lcx = 106
+lcy = 150
 lcenter = (lcx, lcy)  # 左圆心
-rcx = 1142
-rcy = 198
+rcx = 1017
+rcy = 150
 rcenter = (rcx, rcy)  # 右圆心
-# 读取图片文件
-img = cv2.imread("mskover.png")
-xiaoup = cv2.imread("maskup.png")
-xiaoleft = cv2.imread("maskleft.png")
-xiaodown = cv2.imread("maskdown.png")
-xiaoright = cv2.imread("maskright.png")
+piancha = 0
+# 微调高度，注意y轴正方向
+trim_up = -5
+trim_upup = -10
+weitiaoleft=-8
+img = cv2.imread("result_gray.png")
+xiaoup = cv2.imread("cut2.png")
+xiaoleft = cv2.imread("cut1.png")
+xiaodown = cv2.imread("cut4.png")
+xiaoright = cv2.imread("cut3.png")
+maskleft = cv2.imread("cad_cut_1.png")
+maskright = cv2.imread("cad_cut_3.png")
+print(xiaoleft.shape)
+
 # 获取图像尺寸
 # height, width, channels = img.shape
 img_copy = img.copy()  # 保存原始图片的副本
-print(img.shape)
+
+
+# print(img.shape)
 
 
 def get_cercle(cx, cy):
@@ -41,10 +77,8 @@ def get_cercle(cx, cy):
 
 
 def get_mouse_pos(event, x, y, flags, param):
-    global mx, my, img, y2, x2, y1, x1
-    # 微调高度，注意y轴正方向
-    trim_up = -5
-    trim_upup = -10
+    global mx, my, img, y2, x2, y1, x1, flag, width
+
     # 大图坐标转小图
     if event == cv2.EVENT_MOUSEMOVE:
 
@@ -64,12 +98,17 @@ def get_mouse_pos(event, x, y, flags, param):
         # # # 绘制文字信息
 
         # 计算左侧半圆弧度值
-        if lcx > mx >= 0:
+        if lcx >= mx >= 0:
             x1, y1, x2, y2 = get_cercle(lcx, lcy)
             # 大图坐标转小图坐标，调用亿力的函数
-            flag, width = MouseMinWidth.MouseMinWidthInRing(x2 - 22, y2 - 96, x1 - 22, y1 - 96, xiaoleft)
+            # try:
+            flag, width = MouseMinWidth.MouseMinWidthInRing(x2 - (lcx - radius1), y2 - (lcy - radius1) + piancha,
+                                                            x1 - (lcx - radius1), y1 - (lcy - radius1) + piancha,
+                                                            xiaoleft, maskleft)
+            # except Exception as result:
+            #     print(result)
         # 计算中间上部条形
-        if lcx <= mx < rcx and 0 < my <= rcy:
+        if lcx < mx < rcx and 0 < my <= rcy:
             x1 = x2 = mx
             y1 = lcy - radius1
             y2 = lcy - radius0
@@ -77,10 +116,10 @@ def get_mouse_pos(event, x, y, flags, param):
             xx = x1 - lcx
             flag, width = MouseMinWidth.MouseMinWidthInLine(xx, xiaoup)
         # 计算中间下部条形
-        if lcx <= mx < rcx and my > rcy:
+        if lcx < mx < rcx and my > rcy:
             x1 = x2 = mx
-            y1 = lcy + radius1
-            y2 = lcy + radius0
+            y1 = lcy + radius1 + piancha
+            y2 = lcy + radius0 + piancha
             # 大图坐标转小图坐标，调用亿力的函数
             xx = x1 - lcx
             flag, width = MouseMinWidth.MouseMinWidthInLine(xx, xiaodown)
@@ -88,10 +127,13 @@ def get_mouse_pos(event, x, y, flags, param):
         if mx >= rcx:
             x1, y1, x2, y2 = get_cercle(rcx, rcy)
             # 大图坐标转小图坐标，调用亿力的函数
-            flag, width = MouseMinWidth.MouseMinWidthInRing(x2 - 1142, y2 - 96, x1 - 1142, y1 - 96, xiaoright)
+            flag, width = MouseMinWidth.MouseMinWidthInRing(x2 - rcx, y2 - (lcy - radius1) + piancha, x1 - rcx,
+                                                            y1 - (lcy - radius1) + piancha, xiaoright, maskright)
+
         # 画线
         # cv2.line(img_draw, (x1, y1), (x2, y2), (0, 255, 0), 3)
         draw.line([(x1, y1), (x2, y2)], fill=(0, 255, 0), width=3)
+
         # 在图片上添加文本
         font = cv2.FONT_HERSHEY_SIMPLEX  # 字体类型
         text0 = '是否合格:'  # flag
@@ -103,6 +145,10 @@ def get_mouse_pos(event, x, y, flags, param):
         text3 = "最小焊缝宽度:"
 
         color = (255, 255, 255)  # BGR 格式颜色
+        if flag == False:
+            color1 = (0, 0, 255)
+        else:
+            color1 = color
         # thickness = 1  # 粗细
         # font_scale = 0.8  # 字体大小
         # text_size0, _ = cv2.getTextSize(text0, font, font_scale, thickness)
@@ -115,71 +161,65 @@ def get_mouse_pos(event, x, y, flags, param):
         w1, h1 = font1.getsize(text1)
         w2, h2 = font1.getsize(text2)
         w3, h3 = font1.getsize(text3)
-   
-
-        # 显示更新后的图像
-        # cv2.imshow("image", img_draw)
-        img1 = np.array(img_pil)
-        cv2.imshow("image", img1)
-             # 写字上部
+        # 写字上部
         if 0 < my <= rcy:
             # 写字，右侧半圆上部
-            if mx > rcx:
+            if mx >= rcx:
                 if w2 + x2 > width - rcx:
                     # 第一个汉字语句
-                    draw.text((x1 - w2 - w3, y1 + h2), text0, font=font1
+                    draw.text((x1 - w2 - w3+weitiaoleft, y1 + h2), text0, font=font1
                               , fill=color
                               )
                     # 数据1
-                    draw.text((x1 - w2-w1, y1 + h2), text1, font=font1, fill=color
+                    draw.text((x1 - w2 - w1, y1 + h2), text1, font=font1, fill=color1
                               )
                     # 数据2
-                    draw.text((x1 - w2, y1 + 2 * h2), text2, font=font1, fill=color
+                    draw.text((x1 - w2+weitiaoleft, y1 + 2 * h2), text2, font=font1, fill=color
                               )
                     # 第二个汉字语句
-                    draw.text((x1 - w2 - w3, y1 + 2 * h2), text3, font=font1
+                    draw.text((x1 - w2 - w3+weitiaoleft, y1 + 2 * h2), text3, font=font1
                               , fill=color
                               )
             # 写字，左侧半圆上部
-            if mx < lcx:
+            if mx <= lcx:
                 # if w2 + w3 > x2:
-                    draw.text((x1, y1 + h2), text0, font=font1, fill=color
-                              )
-                    draw.text((x1 + w0, y1 + h2), text1, font=font1, fill=color
-                              )
-                    draw.text((x1 + w3, y1 + 2 * h2), text2, font=font1, fill=color
-                              )
-                    draw.text((x1, y1 + 2 * h2), text3, font=font1, fill=color
-                              )
-                # draw.text((x1, y1 + h2), text0, font=font1, fill=color
-                #           )
-                # draw.text((x1 + w0, y1 + h2), text1, font=font1, fill=color
-                #           )
-                # draw.text((x1 + w3, y1 + 2 * h2), text2, font=font1, fill=color
-                #           )
-                # draw.text((x1, y1 + 2 * h2), text3, font=font1, fill=color
-                #           )
+                draw.text((x1, y1 + h2), text0, font=font1, fill=color
+                          )
+                draw.text((x1 + w0, y1 + h2), text1, font=font1, fill=color1
+                          )
+                draw.text((x1 + w3, y1 + 2 * h2), text2, font=font1, fill=color
+                          )
+                draw.text((x1, y1 + 2 * h2), text3, font=font1, fill=color
+                          )
+            # draw.text((x1, y1 + h2), text0, font=font1, fill=color
+            #           )
+            # draw.text((x1 + w0, y1 + h2), text1, font=font1, fill=color
+            #           )
+            # draw.text((x1 + w3, y1 + 2 * h2), text2, font=font1, fill=color
+            #           )
+            # draw.text((x1, y1 + 2 * h2), text3, font=font1, fill=color
+            #           )
 
             # 写字，中间条形上部
-            if lcx <= mx <= rcx:
-                draw.text((x1 - w3 , y1-h2-h1+trim_upup), text0, font=font1,
+            if lcx < mx < rcx:
+                draw.text((x1 - w3, y1 - h2 - h1 + trim_upup), text0, font=font1,
                           fill=color)
 
-                draw.text((x1-w1, y1 - h2-h1 + trim_upup), text1, font=font1, fill=color)
-                draw.text((x1, y1-h2 +trim_up), text2, font=font1, fill=color)
-                draw.text((x1 - w3, y1 -h2+ trim_up), text3, font=font1, fill=color)
+                draw.text((x1 - w1, y1 - h2 - h1 + trim_upup), text1, font=font1, fill=color1)
+                draw.text((x1, y1 - h2 + trim_up), text2, font=font1, fill=color)
+                draw.text((x1 - w3, y1 - h2 + trim_up), text3, font=font1, fill=color)
         else:
             # 写字，右侧半圆下部
-            if mx > rcx:
+            if mx >= rcx:
                 # if  w2 + x2 > width:
-                draw.text((x1 - w2 - w3, y1 - h2-h3), text0, font=font1,
+                draw.text((x1 - w2 - w3+weitiaoleft, y1 - h2 - h3), text0, font=font1,
                           fill=color
                           )
-                draw.text((x1 - w2-w1, y1 - h2-h3), text1, font=font1, fill=color
+                draw.text((x1 - w2 - w1, y1 - h2 - h3), text1, font=font1, fill=color1
                           )
-                draw.text((x1 - w2, y1-h2), text2, font=font1, fill=color
+                draw.text((x1 - w2+weitiaoleft, y1 - h2), text2, font=font1, fill=color
                           )
-                draw.text((x1 - w2 - w3, y1-h2), text3, font=font1, fill=color
+                draw.text((x1 - w2 - w3+weitiaoleft, y1 - h2), text3, font=font1, fill=color
                           )
                 # else:
                 #  draw.text(img_draw, text1, (x1 -  w2, y1 - h2), font,    ,fill=color,
@@ -187,59 +227,67 @@ def get_mouse_pos(event, x, y, flags, param):
                 #  draw.text(img_draw, text2, (x1 -  w2, y1), font,    ,fill=color,
                 #               )
             # 写字，左侧半圆下部
-            if mx < lcx:
+            if mx <= lcx:
                 if w2 + w3 > x2:
-                    draw.text((x1, y1-h3-h2 ), text0, font=font1, fill=color
+                    draw.text((x1, y1 - h3 - h2), text0, font=font1, fill=color
                               )
-                    draw.text((x1 + w0, y1-h3 -h2), text1, font=font1, fill=color
+                    draw.text((x1 + w0, y1 - h3 - h2), text1, font=font1, fill=color1
                               )
-                    draw.text((x1 + w3, y1-h3), text2, font=font1, fill=color
+                    draw.text((x1 + w3, y1 - h3), text2, font=font1, fill=color
                               )
-                    draw.text((x1, y1-h3), text3, font=font1, fill=color
+                    draw.text((x1, y1 - h3), text3, font=font1, fill=color
                               )
 
             # 写字，中间条形下部,分成三部分
             # 左
-            if lcx + w3 > mx >= lcx:
-                draw.text((x1, y2 - h2-h1 + trim_upup), text0, font=font1, fill=color
+            if lcx + w3 > mx > lcx:
+                draw.text((x1, y2 - h2 - h1 + trim_upup), text0, font=font1, fill=color
                           )
-                draw.text((x1 + w0, y2 - h2-h1 + trim_upup), text1, font=font1,
-                          fill=color,
+                draw.text((x1 + w0, y2 - h2 - h1 + trim_upup), text1, font=font1,
+                          fill=color1,
                           )
-                draw.text((x1 + w3, y2- h2 + trim_up), text2, font=font1, fill=color)
-                draw.text((x1, y2- h2 + trim_up), text3, font=font1, fill=color)
+                draw.text((x1 + w3, y2 - h2 + trim_up), text2, font=font1, fill=color)
+                draw.text((x1, y2 - h2 + trim_up), text3, font=font1, fill=color)
             # 中间
             if lcx + w3 <= mx <= rcx - w2:
-                draw.text((x1 - w3, y2 - h2-h1 + trim_upup), text0, font=font1,
+                draw.text((x1 - w3, y2 - h2 - h1 + trim_upup), text0, font=font1,
                           fill=color
                           )
-                draw.text((x1-w1, y2 - h2-h1 + trim_upup), text1, font=font1, fill=color)
-                draw.text((x1, y2 - h2+ trim_up), text2, font=font1, fill=color)
-                draw.text((x1 - w3, y2- h2 + trim_up), text3, font=font1, fill=color)
+                draw.text((x1 - w1, y2 - h2 - h1 + trim_upup), text1, font=font1, fill=color1)
+                draw.text((x1, y2 - h2 + trim_up), text2, font=font1, fill=color)
+                draw.text((x1 - w3, y2 - h2 + trim_up), text3, font=font1, fill=color)
             # 右侧
-            if rcx - w2 < mx <= rcx:
-                draw.text((x1 -w2- w3, y2 - h2-h1 + trim_upup), text0, font=font1
+            if rcx - w2 < mx < rcx:
+                draw.text((x1 - w2 - w3, y2 - h2 - h1 + trim_upup), text0, font=font1
                           ,
                           fill=color
                           )
-                draw.text((x1 - w2-w1, y2 - h2-h1 + trim_upup), text1, font=font1,
-                          fill=color
+                draw.text((x1 - w2 - w1, y2 - h2 - h1 + trim_upup), text1, font=font1,
+                          fill=color1
                           )
-                draw.text((x1 - w2, y2- h2 + trim_up), text2, font=font1, fill=color
+                draw.text((x1 - w2, y2 - h2 + trim_up), text2, font=font1, fill=color
                           )
-                draw.text((x1 - w2 - w3, y2- h2 + trim_up), text3, font=font1,
+                draw.text((x1 - w2 - w3, y2 - h2 + trim_up), text3, font=font1,
                           fill=color
                           )
 
+        # 显示更新后的图像
+        # cv2.imshow("image", img_draw)
+        img1 = np.array(img_pil)
 
-cv2.namedWindow('image',cv2.WND_PROP_FULLSCREEN)
-cv2.setWindowProperty('image', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-cv2.resizeWindow("image", img.shape[1], img.shape[0])  # 设置窗口大小
-cv2.moveWindow("image",200,200)
+        # 在窗口中展示图片
+        cv2.imshow('image', img1)
+        # cv2.imshow("image", img1)
+
+
+# cv2.namedWindow('image',cv2.WND_PROP_FULLSCREEN)
+# cv2.setWindowProperty('image', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+# cv2.resizeWindow("image", img.shape[1], img.shape[0])  # 设置窗口大小
+# cv2.moveWindow("image",200,200)
 
 # # 初始化显示窗口
 # cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-
+cv2.namedWindow("image")
 # 绑定鼠标事件处理函数
 cv2.setMouseCallback("image", get_mouse_pos)
 """
@@ -265,13 +313,9 @@ cv2.setMouseCallback("image", get_mouse_pos)
     cv2.moveWindow("image",50,500)
 """
 
-# 初始化显示窗口
-cv2.namedWindow("image")
+# 在窗口中展示图片
 
-# 绑定鼠标事件处理函数
-cv2.setMouseCallback("image", get_mouse_pos)
-# 在窗口中显示图片
-cv2.imshow("image", img)
+# cv2.imshow("image", img)
 
 cv2.waitKey(0)
 
